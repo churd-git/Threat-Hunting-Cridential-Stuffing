@@ -1,5 +1,4 @@
-# Threat-Hunting-Cridential-Stuffing
-# Threat Hunt Report (Unauthorized TOR Usage)
+# Threat Hunt Report (Cridential Stuffing)
 **Detection of Unauthorized TOR Browser Installation and Use**
 
 ## Example Scenario:
