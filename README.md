@@ -2,10 +2,10 @@
 **Detection of Unauthorized TOR Browser Installation and Use**
 
 ## Example Scenario:
-
-Recent reports reveal a newly discovered Advanced Persistent Threat (APT) group known as "Jackal Spear," originating from South Africa and occasionally operating in Egypt. This group has been targeting large corporations using spear-phishing campaigns and credential stuffing attacks. By exploiting stolen credentials, they can gain access to systems with minimal login attempts. Their primary targets are executives. Once they successfully compromise an account, they establish persistence by creating a secondary account on the same system with a similar username. This new account is then used to exfiltrate sensitive data while avoiding detection. Management has tasked you with identifying Indicators of Compromise (IoCs) related to this South African/Egyptian APT within our systems. If you find any IoCs, conduct a thorough investigation to track the attacker’s movements and piece together their tactics, techniques, and procedures (TTPs).
 ---
+Recent reports reveal a newly discovered Advanced Persistent Threat (APT) group known as "Jackal Spear," originating from South Africa and occasionally operating in Egypt. This group has been targeting large corporations using spear-phishing campaigns and credential stuffing attacks. By exploiting stolen credentials, they can gain access to systems with minimal login attempts. Their primary targets are executives. Once they successfully compromise an account, they establish persistence by creating a secondary account on the same system with a similar username. This new account is then used to exfiltrate sensitive data while avoiding detection. Management has tasked you with identifying Indicators of Compromise (IoCs) related to this South African/Egyptian APT within our systems. If you find any IoCs, conduct a thorough investigation to track the attacker’s movements and piece together their tactics, techniques, and procedures (TTPs).
 
+---
 ## High-Level TOR related IoC Discovery Plan:
 1. Check DeviceFileEvents for any tor(.exe) or firefox(.exe) file events
 2. Check DeviceProcessEvents for any signs of installation or usage
