@@ -11,7 +11,7 @@ Recent reports reveal a newly discovered Advanced Persistent Threat (APT) group 
 ## High-Level Cridential Stuffing related IoC Discovery Plan:
 1. Check DeviceLogonEvents for any brute force IOC on machines from the region of South Africa or Egypt. 
 2. Check DeviceEvents for any signs of a new user account being created.
-3. Check DeviceProccessEvents for any signs suspcious actions or behaviour executed by the threat actor.
+3. Check DeviceProccessEvents for any signs suspicious actions or behaviour executed by the threat actor.
 4. Check DeviceFileEvents for to confirm the succesful creation of the files. 
 
 ---
