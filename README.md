@@ -16,9 +16,9 @@ Recent reports reveal a newly discovered Advanced Persistent Threat (APT) group 
 
 ## Steps Taken
 
-1. Searched the DeviceLogonEvents for any brute force IOCs. The search was narrowed to IP addresses only in the regions of South Africa and Egypt. The results showed 22 options. After deeper investigation "102.37.140.95" was found to be the IP of the malicious attacker because the patterns of the logs indicated that this IP was successful in a credential stuffing attempt. The attakc began at "2025-01-29T05:47:47.9786193Z", they succesffuly accessed the account at "2025-01-29T05:48:49.4362038Z".
+1. Searched the DeviceLogonEvents for any brute force IOCs. The search was narrowed to IP addresses only in the regions of South Africa and Egypt. The results showed 22 options. After deeper investigation "102.37.140.95" was found to be the IP of the malicious attacker because the patterns of the logs indicated that this IP was successful in a credential stuffing attempt. The attack began at "2025-01-29T05:47:47.9786193Z", they successfully accessed the account at "2025-01-29T05:48:49.4362038Z".
 
-Querys used to locate these events:
+Queries used to locate these events:
 ```kql
 DeviceLogonEvents 
 | where ActionType == "LogonFailed"
@@ -35,9 +35,9 @@ DeviceLogonEvents
 ```
 <img width="1431" alt="Screenshot 2025-02-01 at 7 18 26 PM" src="https://github.com/user-attachments/assets/fbcac013-1157-4ea0-9b8e-c732017ec7d2" />
   
-2. Searched the DeviceEvents logs for idication that a new user was created in order to find out if the APT had tried to establish persistence. At "2025-01-29T05:51:25.6071097Z", less than 5 minutes after the account was compromsied a new user named "chadwick.s" was created. This is consistent with the report that the APT group uses a similar account name when establishing persistence in a newly compromised environment by using a similar user name.
+2. Searched the DeviceEvents logs for indication that a new user was created in order to find out if the APT had tried to establish persistence. At "2025-01-29T05:51:25.6071097Z", less than 5 minutes after the account was compromised a new user named "chadwick.s" was created. This is consistent with the report that the APT group uses a similar account name when establishing persistence in a newly compromised environment by using a similar user name.
 
-Querys used to locate these events:
+Query used to locate these events:
 ```kql
 DeviceEvents
 | where DeviceName contains "corpnet-1-ny"
@@ -45,9 +45,9 @@ DeviceEvents
 ```
 <img width="1414" alt="Screenshot 2025-02-01 at 7 25 34 PM" src="https://github.com/user-attachments/assets/8477caec-f6f0-40c8-afd6-880560af0549" />
 
-3. Check DeviceProccessEvents for any signs suspcious actions or behaviour executed by the threat actor. There were a few that showed the newly created account had downloaded, installed and executed 7z which is suspcious because file compression is often used to data exfiltration. The APT exectued the following command: "7z.exe"  a gene_editing_papers.zip "CRISPR-X__Next-Generation_Gene_Editing_for_Artificial_Evolution.pdf" "Genetic_Drift_in_Hyper-Evolving_Species__A_Case_Study.pdf" "Mutagenic_Pathways_and_Cellular_Adaptation.pdf" "Mutational_Therapy__Theoretical_Applications_in_Human_Enhancement.pdf" "Spontaneous_Mutations_in_Simul" at "2025-01-29T06:02:44.2185194Z". These are the files that were targeted by the malicous actors.
+3. Check DeviceProccessEvents for any signs suspicious actions or behaviour executed by the threat actor. There were a few that showed the newly created account had downloaded, installed and executed 7z which is suspicious because file compression is often used to data exfiltration. The APT executed the following command: "7z.exe"  a gene_editing_papers.zip "CRISPR-X__Next-Generation_Gene_Editing_for_Artificial_Evolution.pdf" "Genetic_Drift_in_Hyper-Evolving_Species__A_Case_Study.pdf" "Mutagenic_Pathways_and_Cellular_Adaptation.pdf" "Mutational_Therapy__Theoretical_Applications_in_Human_Enhancement.pdf" "Spontaneous_Mutations_in_Simul" at "2025-01-29T06:02:44.2185194Z". These are the files that were targeted by the malicous actors.
 
-Querys used to locate these events:
+Query used to locate these events:
 ```kql
 DeviceProcessEvents
 | where DeviceName == "corpnet-1-ny" 
@@ -56,9 +56,9 @@ DeviceProcessEvents
 ```
 <img width="1425" alt="Screenshot 2025-02-01 at 7 32 04 PM" src="https://github.com/user-attachments/assets/744b401b-160c-4498-9bf2-c569ab066982" />
 
-4. Searched DeviceFileEvents for to confirm the succesful creation of the compressed files called "gene_editing_papers.zip". The file was created at "2025-01-29T06:02:44.3408164Z", however it does not appear that the data was successfully exfiltrated.  
+4. Searched DeviceFileEvents for to confirm the successful creation of the compressed files called "gene_editing_papers.zip". The file was created at "2025-01-29T06:02:44.3408164Z", however it does not appear that the data was successfully exfiltrated.  
 
-Querys used to locate these events:
+Query used to locate these events:
 ```kql
 DeviceFileEvents 
 | where DeviceName == "corpnet-1-ny"
