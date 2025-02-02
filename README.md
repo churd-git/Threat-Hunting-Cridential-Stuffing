@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/961992c9-0651-4573-be17-5133c312f44f)
+
 # Threat Hunt Report (Credential Stuffing)
 **Detection of Credential Stuffing & Data Exfiltration**
 
