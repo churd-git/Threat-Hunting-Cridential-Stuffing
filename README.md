@@ -72,85 +72,166 @@ DeviceFileEvents
 
 ## Chronological Events
 
-1. ...
-2. ...
-3. ...
+Here is the revised **timeline report** formatted according to your preference:
 
 ---
 
-## Summary
+# **Credential Stuffing Attack - Timeline Report**  
+**APT Group:** Jackal Spear  
+**Incident Date:** January 29, 2025  
+**Affected System:** `corpnet-1-ny`  
 
-...
+---
+
+1. ### **Initial Credential Stuffing Attempts**  
+   **Timestamp:** 2025-01-29 05:47:47Z  
+   **Event:** Multiple failed login attempts were detected from IP `102.37.140.95`, originating from South Africa.  
+   **Source:** `DeviceLogonEvents` logs.  
+   **Query:**  
+   ```kql
+   DeviceLogonEvents 
+   | where ActionType == "LogonFailed"
+   | summarize FailedLogonAttempts = count() by RemoteIP
+   | where FailedLogonAttempts < 30
+   | where RemoteIP startswith "41" or RemoteIP startswith "102" or RemoteIP startswith "105" or RemoteIP startswith "196" or RemoteIP startswith "197" or RemoteIP startswith "156"
+   ```
+
+2. ### **Successful Credential Compromise**  
+   **Timestamp:** 2025-01-29 05:48:49Z  
+   **Event:** A successful login attempt was recorded from the attacker’s IP `102.37.140.95`.  
+   **Source:** `DeviceLogonEvents` logs.  
+   **Query:**  
+   ```kql
+   DeviceLogonEvents
+   | where RemoteIP == "102.37.140.95"
+   | where Timestamp >= datetime(2025-01-29T05:47:47.9786193Z)
+   ```
+
+3. ### **Persistence Established via New User Account**  
+   **Timestamp:** 2025-01-29 05:51:25Z  
+   **Event:** A new user account **"chadwick.s"** was created, consistent with the APT’s persistence tactics.  
+   **Source:** `DeviceEvents` logs.  
+   **Query:**  
+   ```kql
+   DeviceEvents
+   | where DeviceName contains "corpnet-1-ny"
+   | where ActionType contains "UserAccountCreated"
+   ```
+
+4. ### **Execution of File Compression Utility**  
+   **Timestamp:** 2025-01-29 06:02:44Z  
+   **Event:** The attacker downloaded, installed, and executed **7-Zip**, a known tool for data compression.  
+   **Source:** `DeviceProcessEvents` logs.  
+   **Query:**  
+   ```kql
+   DeviceProcessEvents
+   | where DeviceName == "corpnet-1-ny" 
+   | where AccountName == "chadwick.s"
+   | where ProcessVersionInfoProductName contains "7-Zip"
+   ```
+
+5. ### **Data Targeted for Exfiltration**  
+   **Timestamp:** 2025-01-29 06:02:44Z  
+   **Event:** The attacker compressed multiple research files into `gene_editing_papers.zip`.  
+   **Command Executed:**  
+   ```plaintext
+   "7z.exe" a gene_editing_papers.zip "CRISPR-X__Next-Generation_Gene_Editing_for_Artificial_Evolution.pdf" 
+   "Genetic_Drift_in_Hyper-Evolving_Species__A_Case_Study.pdf" 
+   "Mutagenic_Pathways_and_Cellular_Adaptation.pdf" 
+   "Mutational_Therapy__Theoretical_Applications_in_Human_Enhancement.pdf" 
+   "Spontaneous_Mutations_in_Simul"
+   ```
+   **Source:** `DeviceProcessEvents` logs.  
+
+6. **File Creation & Exfiltration Attempt**  
+   **Timestamp:** 2025-01-29 06:02:44Z  
+   **Event:** The zip file `gene_editing_papers.zip` was successfully created in the system.  
+   **File Path:** `C:\Users\chadwicks\Documents\CRISPR Research\gene_editing_papers.zip`  
+   **Source:** `DeviceFileEvents` logs.  
+   **Query:**  
+   ```kql
+   DeviceFileEvents 
+   | where DeviceName == "corpnet-1-ny"
+   | where RequestAccountName == "chadwick.s"
+   | where InitiatingProcessAccountDomain == "corpnet-1-ny"
+   | where InitiatingProcessCommandLine contains "7z"
+   ```
+   **Exfiltration Status:** No evidence found indicating the file was successfully exfiltrated.  
+
+---
+
+## Summary 
+
+On **January 29, 2025**, an Advanced Persistent Threat (APT) group known as **Jackal Spear** executed a **credential stuffing attack** against the corporate system **corpnet-1-ny**. The attack originated from **IP address 102.37.140.95**, located in **South Africa**, and involved multiple failed login attempts before successfully compromising an account at **05:48:49 UTC**. Within three minutes of gaining access, the attacker created a new user account, **"chadwick.s"**, as a persistence mechanism, mirroring a known tactic of this APT group. Shortly after, the threat actor downloaded and executed **7-Zip**, a tool commonly used for **data compression and exfiltration**. At **06:02:44 UTC**, the attacker used 7-Zip to compress multiple sensitive **gene-editing research files** into a zip archive named **"gene_editing_papers.zip"**, located in the **CRISPR Research directory** on the compromised system. While the files were successfully compressed, there is no clear evidence from the logs that the data was fully exfiltrated. The attack followed a structured sequence—initial access via credential stuffing, persistence via a secondary account, and attempted data exfiltration via file compression—indicating a well-planned intrusion. This incident underscores the importance of **multi-factor authentication (MFA), proactive monitoring for unauthorized account creation, and strict access controls on sensitive research files** to mitigate similar threats in the future.
 
 ---
 
 ## Response Taken
-TOR usage was confirmed on endpoint ______________. The device was isolated and the user's direct manager was notified.
+Credential stuffing attack was confirmed on endpoint corpnet-1-ny. The device was isolated, the machine was reset to a state before it was compromised, and the user's cridentials were reset. 
 
 ---
 
 ## MDE Tables Referenced:
 | **Parameter**       | **Description**                                                              |
 |---------------------|------------------------------------------------------------------------------|
-| **Name**| DeviceFileEvents|
-| **Info**|https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-deviceinfo-table|
-| **Purpose**| Used for detecting TOR download and installation, as well as the shopping list creation and deletion. |
+| **Name**| DeviceLogonEvents|
+| **Info**|https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-devicelogonevents-table|
+| **Purpose**| Used for detecting credential stuffing IOCs and identifying malicious IPs.|
 
 | **Parameter**       | **Description**                                                              |
 |---------------------|------------------------------------------------------------------------------|
-| **Name**| DeviceProcessEvents|
-| **Info**|https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-deviceinfo-table|
-| **Purpose**| Used to detect the silent installation of TOR as well as the TOR browser and service launching.|
+| **Name**| DeviceEvents|
+| **Info**|https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-deviceevents-table|
+| **Purpose**| Used to detect if a new account was created to establish persistence.|
 
 | **Parameter**       | **Description**                                                              |
 |---------------------|------------------------------------------------------------------------------|
-| **Name**| DeviceNetworkEvents|
+| **Name**| DeviceProccessEvents|
 | **Info**|https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-devicenetworkevents-table|
-| **Purpose**| Used to detect TOR network activity, specifically tor.exe and firefox.exe making connections over ports to be used by TOR (9001, 9030, 9040, 9050, 9051, 9150).|
+| **Purpose**| Used to identify any signs suspcious actions or behaviours executed by the threat actor.|
+
+| **Parameter**       | **Description**                                                              |
+|---------------------|------------------------------------------------------------------------------|
+| **Name**|  DeviceFileEvents|
+| **Info**|https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-devicenetworkevents-table|
+| **Purpose**| Used to confirm the succesful creation of the files compressed files.|
 
 ---
 
 ## Detection Queries:
 ```kql
-// Installer name == tor-browser-windows-x86_64-portable-(version).exe
-// Detect the installer being downloaded
-DeviceFileEvents
-| where FileName startswith "tor"
+DeviceLogonEvents 
+| where ActionType == "LogonFailed"
+| summarize FailedLogonAttempts = count() by RemoteIP
+| where FailedLogonAttempts < 30
+| where RemoteIP startswith "41" or RemoteIP startswith "102" or RemoteIP startswith "105" or RemoteIP startswith "196" or RemoteIP startswith "197" or RemoteIP startswith "156"
 
-// TOR Browser being silently installed
-// Take note of two spaces before the /S (I don't know why)
+DeviceLogonEvents
+| where RemoteIP == "102.37.140.95"
+| where Timestamp >= datetime(2025-01-29T05:47:47.9786193Z)
+
+DeviceEvents
+| where DeviceName contains "corpnet-1-ny"
+| where ActionType contains "UserAccountCreated"
+
 DeviceProcessEvents
-| where ProcessCommandLine contains "tor-browser-windows-x86_64-portable-14.0.1.exe  /S"
-| project Timestamp, DeviceName, ActionType, FileName, ProcessCommandLine
+| where DeviceName == "corpnet-1-ny" 
+| where AccountName == "chadwick.s"
+| where ProcessVersionInfoProductName contains "7-Zip"
 
-// TOR Browser or service was successfully installed and is present on the disk
-DeviceFileEvents
-| where FileName has_any ("tor.exe", "firefox.exe")
-| project  Timestamp, DeviceName, RequestAccountName, ActionType, InitiatingProcessCommandLine
-
-// TOR Browser or service was launched
-DeviceProcessEvents
-| where ProcessCommandLine has_any("tor.exe","firefox.exe")
-| project  Timestamp, DeviceName, AccountName, ActionType, ProcessCommandLine
-
-// TOR Browser or service is being used and is actively creating network connections
-DeviceNetworkEvents
-| where InitiatingProcessFileName in~ ("tor.exe", "firefox.exe")
-| where RemotePort in (9001, 9030, 9040, 9050, 9051, 9150)
-| project Timestamp, DeviceName, InitiatingProcessAccountName, InitiatingProcessFileName, RemoteIP, RemotePort, RemoteUrl
-| order by Timestamp desc
-
-// User shopping list was created and, changed, or deleted
-DeviceFileEvents
-| where FileName contains "shopping-list.txt"
+DeviceFileEvents 
+| where DeviceName == "corpnet-1-ny"
+| where RequestAccountName == "chadwick.s"
+| where InitiatingProcessAccountDomain == "corpnet-1-ny"
+| where InitiatingProcessCommandLine contains "7z"
 ```
 
 ---
 
 ## Created By:
-- **Author Name**: Josh Madakor
-- **Author Contact**: https://www.linkedin.com/in/joshmadakor/
-- **Date**: August 31, 2024
+- **Author Name**: Carlton Hurd
+- **Author Contact**: https://www.linkedin.com/in/carlton-hurd-6069a5120/
+- **Date**: Feb 1st, 2025
 
 ## Validated By:
 - **Reviewer Name**: 
@@ -167,4 +248,4 @@ DeviceFileEvents
 ## Revision History:
 | **Version** | **Changes**                   | **Date**         | **Modified By**   |
 |-------------|-------------------------------|------------------|-------------------|
-| 1.0         | Initial draft                  | `September  6, 2024`  | `Josh Madakor`   
+| 1.0         | Initial draft                  | `February 1st, 2025`  | `Carlton Hurd`   
